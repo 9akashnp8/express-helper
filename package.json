@@ -9,5 +9,8 @@
   },
   "author": "9akashnp8",
   "license": "ISC",
-  "bin": "./index.js"
+  "bin": "./index.js",
+  "dependencies": {
+    "inquirer": "^9.2.11"
+  }
 }
