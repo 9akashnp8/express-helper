@@ -2,35 +2,55 @@
 
 import fs from "fs";
 import path from "path";
-import { input } from '@inquirer/prompts';
+import inquirer from "inquirer";
 
-const controllerName = await input({ message: 'Controller Name' });
-console.log(controllerName)
+let config
 
-// Controller contents
-const jsCode = `
-import type { Request, Response } from "express";
+function generateBoilerPlate(funcName) {
+    return `
+    import type { Request, Response } from "express";
 
-export async function ${controllerName}Controller(req: Request, res: Response) {
-    res.send("Hello There")
-}
-`;
-
-// subdirectory and filename
-const subdirectory = `src/controllers/${controllerName}`;
-const filename = 'index.ts';
-
-// full path to the subdirectory
-const directoryPath = path.join(".", subdirectory);
-
-// create sub sir if not exists
-if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
+    export async function ${config.name}Controller(req: Request, res: Response) {
+        res.send("Hello There")
+    }
+    `;
 }
 
-// Create the full path to the file
-const filePath = path.join(directoryPath, filename);
+inquirer
+    .prompt([
+        {
+            name: 'srcLocation',
+            message: 'What is your src folder located color?'
+        },
+        {
+            type: 'list',
+            name: 'type',
+            message: 'What do you want to generate?',
+            choices: [
+                'Controllers',
+                'Service',
+            ],
+        },
+        {
+            name: 'name',
+            message: 'Name of the object',
+        },
+    ])
+    .then(answers => {
+        config = answers
 
-fs.writeFileSync(filePath, jsCode);
+        const subdirectory = `src/controllers/${config.name}`;
+        const filename = 'index.ts';
 
-console.log(`JavaScript file '${filename}' created in '${subdirectory}'`);
+        const directoryPath = path.join(config.srcLocation, subdirectory);
+
+        if (!fs.existsSync(directoryPath)) {
+            fs.mkdirSync(directoryPath, { recursive: true });
+        }
+
+        const filePath = path.join(directoryPath, filename);
+
+        fs.writeFileSync(filePath, generateBoilerPlate(config.name));
+
+        console.log(`Object created: ${filePath}`);
+    });
